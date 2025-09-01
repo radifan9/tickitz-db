@@ -39,7 +39,7 @@ Table users {
   updated_at TIMESTAMPZ
 }
 
-Table profile {
+Table user_profile {
   user_id UUID PK
   first_name VARCHAR(30)
   last_name VARCHAR(30)
@@ -84,8 +84,8 @@ Table schedules {
   id INT PK
   movie_id INT
   city_id INT
-  time_id INT
-  cinemas_id INT
+  show_time_id INT
+  cinema_id INT
   show_date DATE // tanggal tayang
 }
 
@@ -95,7 +95,7 @@ Table transactions_seats {
   transactions_id UUID PK
 }
 
-Table seats_code {
+Table seat_codes {
   id INT PK
   seat_code VARCHAR(3) [not null]
 }
@@ -105,7 +105,7 @@ Table cities {
   name TEXT UNIQUE [NOT NULL]
 }
 
-Table time {
+Table show_time {
   id INT PK
   show_time TEXT UNIQUE [NOT NULL]
   // 09.00
@@ -135,15 +135,15 @@ Ref: transactions.user_id > users.id
 Ref: "transactions"."schedule_id" > "schedules"."id"
 Ref: "people"."id" < "movies"."director_id"
 Ref: "payments"."id" < "transactions"."payment_id"
-Ref: "time"."id" < "schedules"."time_id"
+Ref: "show_time"."id" < "schedules"."show_time_id"
 Ref: "genre"."id" < "movie_genres"."genre_id"
 Ref: "movies"."id" < "movie_genres"."movie_id"
 Ref: "people"."id" < "movie_actors"."actor_id"
 Ref: "movies"."id" < "movie_actors"."movie_id"
 Ref: "schedules"."city_id" > "cities"."id"
 Ref: "movies"."id" < "schedules"."movie_id"
-Ref: "profile"."user_id" - "users"."id"
-Ref: "cinemas"."id" < "schedules"."cinemas_id"
-Ref: "seats_code"."id" < "transactions_seats"."seats_id"
+Ref: "user_profile"."user_id" - "users"."id"
+Ref: "cinemas"."id" < "schedules"."cinema_id"
+Ref: "seat_codes"."id" < "transactions_seats"."seats_id"
 Ref: "transactions_seats"."transactions_id" > "transactions"."id"
 Ref: "age_rating"."id" < "movies"."age_rating_id"
