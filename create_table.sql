@@ -91,7 +91,7 @@ CREATE TABLE "schedules" (
   "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "movie_id" INT,
   "city_id" INT,
-  "time_id" INT,
+  "show_time_id" INT,
   "cinema_id" INT,
   "show_date" DATE
 );
@@ -157,10 +157,12 @@ ALTER TABLE
   "transactions"
 ADD
   FOREIGN KEY ("payment_id") REFERENCES "payments" ("id");
+
 ALTER TABLE
   "schedules"
 ADD
-  FOREIGN KEY ("time_id") REFERENCES "show_time" ("id");
+  FOREIGN KEY ("show_time_id") REFERENCES "show_time" ("id");
+
 ALTER TABLE
   "movie_genres"
 ADD
@@ -201,7 +203,9 @@ ALTER TABLE
   "transactions_seats"
 ADD
   FOREIGN KEY ("transactions_id") REFERENCES "transactions" ("id");
+
 alter table
   movies
 add
   constraint fk_age_rating foreign key (age_rating_id) references age_ratings (id);
+
