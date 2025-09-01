@@ -1,0 +1,149 @@
+// Link : https://dbdiagram.io/d/ticktitz-68afbd10777b52b76ce3f308
+// 1 transactions = 1 transaction 
+Table transactions {
+  id UUID PK
+  user_id UUID
+  payment_id INT
+  paid_at TIMESTAMPZ // waktu user membayar
+  total_payment INT // harga percinema
+  is_paid BOOLEAN
+  full_name VARCHAR(60)
+  email TEXT
+  phone_number VARCHAR(13) // jika user mau ganti nomer telpon
+  created_at TIMESTAMPZ
+  updated_at TIMESTAMPZ
+  schedule_id INT
+}
+
+Table cinemas {
+  id INT PK
+  name TEXT [not null]
+  img TEXT [not null]
+  ticket_price INT [not null] // misal 50_000
+}
+
+
+Table payments {
+  id INT PK
+  method TEXT [not null] // gopay, visa, dana, dll
+  img TEXT [not null]
+}
+
+
+Table users {
+  id UUID PK
+  role role_types
+  email TEXT
+  password TEXT
+  created_at TIMESTAMPZ
+  updated_at TIMESTAMPZ
+}
+
+Table profile {
+  user_id UUID PK
+  first_name VARCHAR(30)
+  last_name VARCHAR(30)
+  profile_img TEXT
+  phone_number VARCHAR(13)
+  points INT
+  created_at TIMESTAMPZ
+  updated_at TIMESTAMPZ
+}
+
+Enum role_types {
+  "admin"
+  "user"
+}
+
+
+Table movies {
+  title TEXT
+  synopsis TEXT
+  poster_img STRING
+  backdrop_img STRING
+  duration_minutes INT
+  release_date DATETIME
+  created_at TIMESTAMPZ
+  updated_at TIMESTAMPZ
+  age_rating_id INT
+  director_id INT // ? boleh dijadikan satu
+  id INT Pk
+}
+
+Table age_rating {
+  id INT
+  age_rating TEXT UNIQUE [NOT NULL]
+}
+
+Table movie_actors {
+  actor_id INT PK
+  movie_id INT PK
+}
+
+Table schedules {
+  id INT PK
+  movie_id INT
+  city_id INT
+  time_id INT
+  cinemas_id INT
+  show_date DATE // tanggal tayang
+}
+
+Table transactions_seats {
+  seats_id INT PK
+  // schedule_id INT PK
+  transactions_id UUID PK
+}
+
+Table seats_code {
+  id INT PK
+  seat_code VARCHAR(3) [not null]
+}
+
+Table cities {
+  id INT PK
+  name TEXT UNIQUE [NOT NULL]
+}
+
+Table time {
+  id INT PK
+  show_time TEXT UNIQUE [NOT NULL]
+  // 09.00
+  // 12.00
+  // 15.00
+  // 18.00
+  // 21.00
+}
+
+Table movie_genres {
+  movie_id INT PK
+  genre_id INT PK
+}
+
+Table genre {
+  id INT PK
+  name VARCHAR(20) UNIQUE [NOT NULL]
+}
+
+Table people {
+  id INT PK
+  name TEXT UNIQUE [NOT NULL]
+}
+
+
+Ref: transactions.user_id > users.id
+Ref: "transactions"."schedule_id" > "schedules"."id"
+Ref: "people"."id" < "movies"."director_id"
+Ref: "payments"."id" < "transactions"."payment_id"
+Ref: "time"."id" < "schedules"."time_id"
+Ref: "genre"."id" < "movie_genres"."genre_id"
+Ref: "movies"."id" < "movie_genres"."movie_id"
+Ref: "people"."id" < "movie_actors"."actor_id"
+Ref: "movies"."id" < "movie_actors"."movie_id"
+Ref: "schedules"."city_id" > "cities"."id"
+Ref: "movies"."id" < "schedules"."movie_id"
+Ref: "profile"."user_id" - "users"."id"
+Ref: "cinemas"."id" < "schedules"."cinemas_id"
+Ref: "seats_code"."id" < "transactions_seats"."seats_id"
+Ref: "transactions_seats"."transactions_id" > "transactions"."id"
+Ref: "age_rating"."id" < "movies"."age_rating_id"
