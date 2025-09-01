@@ -1,53 +1,22 @@
--- Create database for owner tickitz
-create database tickitz owner tickitz;
+-- --- --- Create database --- --- ---
+CREATE DATABASE tickitz OWNER tickitz;
 
--- Enum
+
+-- --- --- Enums --- --- ---
 CREATE TYPE "role_type" AS ENUM ('admin', 'user');
 
--- done
-CREATE TABLE "transactions" (
-  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  "user_id" UUID,
-  "payment_id" INT,
-  "paid_at" TIMESTAMPTZ,
-  "total_payment" INT,
-  "is_paid" BOOLEAN,
-  "full_name" VARCHAR(60),
-  -- jika sudah ada first & last name di user_profiles, ini di isi otomatis disisi front-end
-  "email" TEXT,
-  -- disini dicatat email agar jika user ganti email, ada catatan dulu user ini transaksi di email mana
-  "phone_number" VARCHAR(13),
-  "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-  "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-  "schedule_id" INT
-);
 
--- done
-CREATE TABLE "cinemas" (
-  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "img" TEXT NOT NULL,
-  "ticket_price" INT NOT NULL
-);
-
--- done
-CREATE TABLE "payments" (
-  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  "method" TEXT NOT NULL,
-  "img" TEXT NOT NULL
-);
-
--- done
+-- --- --- Core Tables --- --- ---
 CREATE TABLE "users" (
   "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   "role" role_type DEFAULT 'user',
-  "email" TEXT,
-  "password" TEXT,
+  "email" TEXT NOT NULL,
+  "password" TEXT NOT NULL,
   "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- done
+
 CREATE TABLE "user_profiles" (
   "user_id" UUID PRIMARY KEY,
   "first_name" VARCHAR(30),
@@ -58,6 +27,77 @@ CREATE TABLE "user_profiles" (
   "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+
+CREATE TABLE "transactions" (
+  "id" UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "user_id" UUID,
+  "payment_id" INT,
+  "paid_at" TIMESTAMPTZ,
+  "total_payment" INT,
+  "is_paid" BOOLEAN,
+  "full_name" VARCHAR(60), -- auto-filled from user_profiles (front-end)
+  "email" TEXT, -- record for historical email
+  "phone_number" VARCHAR(13),
+  "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  "schedule_id" INT
+);
+
+
+-- --- --- Reference Tables --- --- ---
+CREATE TABLE "payments" (
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  "method" TEXT NOT NULL,
+  "img" TEXT NOT NULL
+);
+
+
+CREATE TABLE "cinemas" (
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "img" TEXT NOT NULL,
+  "ticket_price" INT NOT NULL
+);
+
+
+CREATE TABLE "cities" (
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  "name" TEXT UNIQUE NOT NULL
+);
+
+
+CREATE TABLE "show_time" (
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  "start_at" TIME UNIQUE NOT NULL
+);
+
+
+CREATE TABLE "seat_codes" (
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  "seat_code" VARCHAR(3) NOT NULL
+);
+
+
+CREATE TABLE "genre" (
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  "name" VARCHAR(20) UNIQUE NOT NULL
+);
+
+
+CREATE TABLE "people" (
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  "name" TEXT UNIQUE NOT NULL
+);
+
+
+CREATE TABLE "movie_genres" (
+  "movie_id" INT, 
+  "genre_id" INT,
+  PRIMARY KEY ("movie_id", "genre_id")
+  );
+
+
 
 -- done
 CREATE TABLE "movies" (
@@ -103,42 +143,9 @@ CREATE TABLE "transactions_seats" (
   PRIMARY KEY ("seats_id", "transactions_id")
 );
 
--- done
-CREATE TABLE "seat_codes" (
-  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  "seat_code" VARCHAR(3) NOT NULL
-);
 
--- done
-CREATE TABLE "cities" (
-  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  "name" TEXT UNIQUE NOT NULL
-);
 
--- done
-CREATE TABLE "show_time" (
-  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  "show_time" TIME UNIQUE NOT NULL
-);
 
--- done
-CREATE TABLE "movie_genres" (
-  "movie_id" INT, 
-  "genre_id" INT,
-  PRIMARY KEY ("movie_id", "genre_id")
-  );
-
--- done
-CREATE TABLE "genre" (
-  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  "name" VARCHAR(20) UNIQUE NOT NULL
-);
-
--- done
-CREATE TABLE "people" (
-  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  "name" TEXT UNIQUE NOT NULL
-);
 
 
 ALTER TABLE
@@ -161,7 +168,7 @@ ADD
 ALTER TABLE
   "schedules"
 ADD
-  FOREIGN KEY ("show_time_id") REFERENCES "show_time" ("id");
+  FOREIGN KEY ("show_time_id") REFERENCES "start_at" ("id");
 
 ALTER TABLE
   "movie_genres"
@@ -208,4 +215,3 @@ alter table
   movies
 add
   constraint fk_age_rating foreign key (age_rating_id) references age_ratings (id);
-
